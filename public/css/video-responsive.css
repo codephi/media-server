@@ -1,0 +1,51 @@
+/* CSS personalizado para limitação de vídeo ao tamanho da tela */
+
+/* Limitar vídeo ao tamanho da viewport */
+video {
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain !important;
+}
+
+/* Estilo específico para o player de vídeo principal */
+#main-video {
+    max-width: 100% !important;
+    max-height: 80vh !important;
+    /* Deixa espaço para controles e interface */
+    width: auto !important;
+    height: auto !important;
+    display: block !important;
+    margin: 0 auto !important;
+    object-fit: contain !important;
+}
+
+/* Container do vídeo responsivo */
+.video-container {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Para telas menores, usar mais espaço vertical */
+@media (max-height: 600px) {
+    #main-video {
+        max-height: 70vh !important;
+    }
+}
+
+/* Para telas muito pequenas */
+@media (max-width: 480px) {
+    #main-video {
+        max-height: 60vh !important;
+    }
+}
+
+/* Garantir que o container do vídeo não ultrapasse a tela */
+.overflow-hidden {
+    max-width: 100% !important;
+}

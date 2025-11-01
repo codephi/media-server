@@ -1,107 +1,98 @@
-{% extends "base.html" %}
-
-{% block title %}{{ file_info.name }} - Media Serve{% endblock %}
-
-{% block actions %}
+{% extends "base.html" %} {% block title %}{{ file_info.name }} - Media Serve{%
+endblock %} {% block actions %}
 <a href="/download/{{ encoded_path }}"
-    class="inline-flex items-center gap-2 rounded-full border border-emerald-400/50 bg-emerald-500/20 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-emerald-200 transition hover:border-emerald-400 hover:bg-emerald-500/30">
-    <iconify-icon icon="heroicons:arrow-down-tray"></iconify-icon>
-    Download</a>
-{% endblock %}
+  class="inline-flex items-center gap-2 rounded-full border border-emerald-400/50 bg-emerald-500/20 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-emerald-200 transition hover:border-emerald-400 hover:bg-emerald-500/30">
+  <iconify-icon icon="heroicons:arrow-down-tray"></iconify-icon>
+  Download</a>
+{% endblock %} {% block content %}
+<div class="">
+  <section
+    class="space-y-6 rounded-2xl border border-slate-800/60 bg-slate-900/60 p-6 shadow-inner shadow-black/40 lg:col-span-1">
+    <div class="space-y-2">
+      <h2 class="truncate text-2xl font-semibold text-slate-100">
+        {{ file_info.name }}
+      </h2>
+      <p class="text-sm text-slate-400">Informações do arquivo</p>
+    </div>
 
-{% block content %}
-<div class="grid gap-8 lg:grid-cols-6">
-    <section
-        class="space-y-6 rounded-2xl border border-slate-800/60 bg-slate-900/60 p-6 shadow-inner shadow-black/40 lg:col-span-1">
-        <div class="space-y-2">
-            <h2 class="truncate text-2xl font-semibold text-slate-100">{{ file_info.name }}</h2>
-            <p class="text-sm text-slate-400">Informações do arquivo</p>
+    <dl class="space-y-3 text-sm">
+      <div
+        class="flex items-center justify-between gap-4 rounded-xl border border-slate-800/70 bg-slate-900/70 px-4 py-3">
+        <dt class="font-medium text-slate-400">Tamanho</dt>
+        <dd class="text-slate-100">{{ formatted_size }}</dd>
+      </div>
+
+      <div
+        class="flex items-center justify-between gap-4 rounded-xl border border-slate-800/70 bg-slate-900/70 px-4 py-3">
+        <dt class="font-medium text-slate-400">Modificado</dt>
+        <dd class="text-slate-100">{{ formatted_modified }}</dd>
+      </div>
+
+      <div
+        class="flex items-center justify-between gap-4 rounded-xl border border-slate-800/70 bg-slate-900/70 px-4 py-3">
+        <dt class="font-medium text-slate-400">Tipo MIME</dt>
+        <dd class="text-slate-100">{{ mime_type }}</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="space-y-6 lg:col-span-4">
+    {% match media_kind %} {% when crate::models::media::MediaKind::Image %}
+    <div class="overflow-hidden rounded-2xl border border-slate-800/60 bg-slate-900/70 p-4">
+      <img id="viewer-image" src="/content/{{ encoded_path }}" alt="{{ file_info.name }}"
+        class="mx-auto max-h-[70vh] w-full rounded-xl object-contain" />
+    </div>
+
+    {% when crate::models::media::MediaKind::Video %}
+    <div class="space-y-4 rounded-2xl border border-slate-800/60 bg-slate-900/70 p-4">
+      <div class="video-container overflow-hidden rounded-xl border border-slate-800/70">
+        <video id="main-video" controls preload="metadata" class="bg-black">
+          <source src="/content/{{ encoded_path }}" type="{{ mime_type }}" />
+          Seu navegador não suporta a reprodução de vídeo.
+        </video>
+      </div>
+      <div id="video-thumbnails-bar" class="hidden rounded-xl border border-slate-800/70 bg-slate-950/70">
+        <div class="max-h-48 overflow-x-auto overflow-y-hidden">
+          <div class="thumbnails-scroll flex gap-3 px-4 py-3">
+            <!-- Miniaturas serão carregadas dinamicamente aqui -->
+          </div>
         </div>
+      </div>
+    </div>
 
-        <dl class="space-y-3 text-sm">
-            <div
-                class="flex items-center justify-between gap-4 rounded-xl border border-slate-800/70 bg-slate-900/70 px-4 py-3">
-                <dt class="font-medium text-slate-400">Tamanho</dt>
-                <dd class="text-slate-100">{{ formatted_size }}</dd>
-            </div>
+    {% when crate::models::media::MediaKind::Audio %}
+    <div class="rounded-2xl border border-slate-800/60 bg-slate-900/70 p-6">
+      <audio controls preload="metadata" class="w-full">
+        <source src="/content/{{ encoded_path }}" type="{{ mime_type }}" />
+        Seu navegador não suporta a reprodução de áudio.
+      </audio>
+    </div>
 
-            <div
-                class="flex items-center justify-between gap-4 rounded-xl border border-slate-800/70 bg-slate-900/70 px-4 py-3">
-                <dt class="font-medium text-slate-400">Modificado</dt>
-                <dd class="text-slate-100">{{ formatted_modified }}</dd>
-            </div>
+    {% when crate::models::media::MediaKind::Pdf %}
+    <div class="overflow-hidden rounded-2xl border border-slate-800/60 bg-slate-900/70">
+      <iframe src="/content/{{ encoded_path }}" width="100%" height="720" class="w-full"></iframe>
+    </div>
 
-            <div
-                class="flex items-center justify-between gap-4 rounded-xl border border-slate-800/70 bg-slate-900/70 px-4 py-3">
-                <dt class="font-medium text-slate-400">Tipo MIME</dt>
-                <dd class="text-slate-100">{{ mime_type }}</dd>
-            </div>
-        </dl>
-    </section>
+    {% when crate::models::media::MediaKind::Text %}
+    <div class="overflow-hidden rounded-2xl border border-slate-800/60 bg-slate-900/70">
+      <iframe src="/content/{{ encoded_path }}" width="100%" height="720" class="w-full"></iframe>
+    </div>
 
-    <section class="space-y-6 lg:col-span-4">
-        {% match media_kind %}
-        {% when crate::models::media::MediaKind::Image %}
-        <div class="overflow-hidden rounded-2xl border border-slate-800/60 bg-slate-900/70 p-4">
-            <img id="viewer-image" src="/content/{{ encoded_path }}" alt="{{ file_info.name }}"
-                class="mx-auto max-h-[70vh] w-full rounded-xl object-contain">
-        </div>
-
-        {% when crate::models::media::MediaKind::Video %}
-        <div class="space-y-4 rounded-2xl border border-slate-800/60 bg-slate-900/70 p-4">
-            <div class="overflow-hidden rounded-xl border border-slate-800/70">
-                <video id="main-video" controls preload="metadata" class="h-full w-full bg-black object-contain">
-                    <source src="/content/{{ encoded_path }}" type="{{ mime_type }}">
-                    Seu navegador não suporta a reprodução de vídeo.
-                </video>
-            </div>
-            <div id="video-thumbnails-bar" class="hidden rounded-xl border border-slate-800/70 bg-slate-950/70">
-                <div class="max-h-48 overflow-x-auto overflow-y-hidden">
-                    <div class="thumbnails-scroll flex gap-3 px-4 py-3">
-                        <!-- Miniaturas serão carregadas dinamicamente aqui -->
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        {% when crate::models::media::MediaKind::Audio %}
-        <div class="rounded-2xl border border-slate-800/60 bg-slate-900/70 p-6">
-            <audio controls preload="metadata" class="w-full">
-                <source src="/content/{{ encoded_path }}" type="{{ mime_type }}">
-                Seu navegador não suporta a reprodução de áudio.
-            </audio>
-        </div>
-
-        {% when crate::models::media::MediaKind::Pdf %}
-        <div class="overflow-hidden rounded-2xl border border-slate-800/60 bg-slate-900/70">
-            <iframe src="/content/{{ encoded_path }}" width="100%" height="720" class="w-full"></iframe>
-        </div>
-
-        {% when crate::models::media::MediaKind::Text %}
-        <div class="overflow-hidden rounded-2xl border border-slate-800/60 bg-slate-900/70">
-            <iframe src="/content/{{ encoded_path }}" width="100%" height="720" class="w-full"></iframe>
-        </div>
-
-        {% when _ %}
-        <div
-            class="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-slate-700 bg-slate-900/50 p-10 text-center text-sm text-slate-400">
-            <img src="/static/icons/{{ media_kind.icon_name() }}" alt="File icon" class="h-16 w-16 opacity-70">
-            <p>Visualização não disponível para este tipo de arquivo.</p>
-        </div>
-        {% endmatch %}
-    </section>
+    {% when _ %}
+    <div
+      class="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-slate-700 bg-slate-900/50 p-10 text-center text-sm text-slate-400">
+      <img src="/static/icons/{{ media_kind.icon_name() }}" alt="File icon" class="h-16 w-16 opacity-70" />
+      <p>Visualização não disponível para este tipo de arquivo.</p>
+    </div>
+    {% endmatch %}
+  </section>
 </div>
-{% endblock %}
-
-{% block scripts %}
-{% match media_kind %}
-{% when crate::models::media::MediaKind::Image %}
+{% endblock %} {% block scripts %} {% match media_kind %} {% when
+crate::models::media::MediaKind::Image %}
 <script src="/static/js/viewer.js"></script>
 {% when crate::models::media::MediaKind::Video %}
 <script>
-    const videoPath = "{{ encoded_path }}";
+  const videoPath = "{{ encoded_path }}";
 </script>
 <script src="/static/js/video-preview.js"></script>
-{% when _ %}
-{% endmatch %}
-{% endblock %}
+{% when _ %} {% endmatch %} {% endblock %}
