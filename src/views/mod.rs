@@ -1,0 +1,1 @@
+// Views module - Askama templates are compiled at build time

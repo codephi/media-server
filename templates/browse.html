@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Browse - Media Serve{% endblock %}
+
+{% block actions %}
+<div class="view-toggle">
+    <a href="?view=list{% if show_hidden %}&show_hidden=1{% endif %}" 
+       class="btn {% if view_mode == "list" %}active{% endif %}">Lista</a>
+    <a href="?view=grid{% if show_hidden %}&show_hidden=1{% endif %}" 
+       class="btn {% if view_mode == "grid" %}active{% endif %}">Galeria</a>
+</div>
+
+<div class="upload-section">
+    <form id="upload-form" action="/upload/{{ current_path }}" method="post" enctype="multipart/form-data">
+        <input type="file" name="files" multiple id="file-input" style="display: none;">
+        <button type="button" class="btn btn-primary" onclick="document.getElementById('file-input').click()">
+            📤 Carregar Arquivos
+        </button>
+        <button type="submit" id="upload-btn" class="btn btn-success" style="display: none;">
+            Enviar
+        </button>
+    </form>
+</div>
+
+<div class="options">
+    {% if show_hidden %}
+        <a href="?view={{ view_mode }}" class="btn btn-sm">Ocultar arquivos ocultos</a>
+    {% else %}
+        <a href="?view={{ view_mode }}&show_hidden=1" class="btn btn-sm">Mostrar arquivos ocultos</a>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block content %}
+{% if view_mode == "grid" %}
+    <div class="grid-view">
+        {% for item in items %}
+        <div class="grid-item">
+            <a href="{% if item.is_dir %}/browse/{{ item.encoded_path }}{% else %}/file/{{ item.encoded_path }}{% endif %}">
+                {% if item.has_thumbnail %}
+                    <img src="/thumbs/{{ item.encoded_path }}?w={{ thumb_size }}" 
+                         alt="{{ item.name }}" 
+                         loading="lazy"
+                         class="thumbnail">
+                {% else %}
+                    <div class="icon-placeholder">
+                        <img src="/static/icons/{{ item.icon }}" alt="{{ item.name }}" class="icon">
+                    </div>
+                {% endif %}
+                <div class="item-name" title="{{ item.name }}">{{ item.name }}</div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <table class="list-view">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Tamanho</th>
+                <th>Modificado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td class="name-col">
+                    <img src="/static/icons/{{ item.icon }}" alt="" class="icon-small">
+                    <a href="{% if item.is_dir %}/browse/{{ item.encoded_path }}{% else %}/file/{{ item.encoded_path }}{% endif %}">
+                        {{ item.name }}
+                    </a>
+                </td>
+                <td class="size-col">{{ item.size }}</td>
+                <td class="date-col">{{ item.modified }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+
+{% if items.is_empty() %}
+    <div class="empty-message">
+        <p>📁 Diretório vazio</p>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('file-input').addEventListener('change', function() {
+    if (this.files.length > 0) {
+        document.getElementById('upload-btn').style.display = 'inline-block';
+        document.getElementById('upload-btn').textContent = `Enviar ${this.files.length} arquivo(s)`;
+    } else {
+        document.getElementById('upload-btn').style.display = 'none';
+    }
+});
+
+document.getElementById('upload-form').addEventListener('submit', function(e) {
+    if (document.getElementById('file-input').files.length === 0) {
+        e.preventDefault();
+        alert('Selecione pelo menos um arquivo');
+    }
+});
+</script>
+{% endblock %}

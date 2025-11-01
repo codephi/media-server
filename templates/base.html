@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Media Serve{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/app.css">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <header class="header">
+        <nav class="breadcrumbs">
+            {% for bc in breadcrumbs %}
+                <a href="/browse/{{ bc.rel_url }}">{{ bc.name }}</a>
+                {% if !loop.last %} / {% endif %}
+            {% endfor %}
+        </nav>
+        
+        <div class="actions">
+            {% block actions %}{% endblock %}
+        </div>
+    </header>
+    
+    <main class="main">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <script src="/static/js/app.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
