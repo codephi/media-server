@@ -49,7 +49,7 @@ impl FileWatcher {
         Ok((file_watcher, broadcast_tx))
     }
 
-    pub async fn run(mut self, broadcast_tx: broadcast::Sender<WatchEvent>) {
+    pub async fn run(self, broadcast_tx: broadcast::Sender<WatchEvent>) {
         let mut debounce_timer = tokio::time::Instant::now();
         let debounce_duration = Duration::from_millis(100);
 

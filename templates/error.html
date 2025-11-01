@@ -10,8 +10,6 @@
             class="mx-auto mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10 ring-1 ring-red-500/20">
             {% if error_type == "permission" %}
             <iconify-icon icon="heroicons:lock-closed" class="text-2xl text-red-400"></iconify-icon>
-            {% else if error_type == "not_found" %}
-            <iconify-icon icon="heroicons:magnifying-glass" class="text-2xl text-red-400"></iconify-icon>
             {% else if error_type == "forbidden" %}
             <iconify-icon icon="heroicons:no-symbol" class="text-2xl text-red-400"></iconify-icon>
             {% else %}

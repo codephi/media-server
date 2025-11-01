@@ -9,7 +9,6 @@ pub mod upload;
 pub mod video_previews;
 
 use std::sync::Arc;
-use tokio::sync::broadcast;
 
 #[derive(Clone)]
 pub struct AppState {

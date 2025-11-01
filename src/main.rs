@@ -32,16 +32,16 @@ async fn main() -> anyhow::Result<()> {
     // Setup file watcher if enabled
     let state = if config.watch_enabled {
         tracing::info!("Watch mode enabled - monitoring file changes");
-        
+
         match models::watcher::FileWatcher::new() {
             Ok((file_watcher, watch_sender)) => {
                 let state = controllers::AppState::new_with_watcher(config, watch_sender.clone());
-                
+
                 // Start the file watcher in background
                 tokio::spawn(async move {
                     file_watcher.run(watch_sender).await;
                 });
-                
+
                 state
             }
             Err(e) => {
@@ -71,8 +71,16 @@ async fn main() -> anyhow::Result<()> {
         .route("/upload/", post(controllers::upload::upload))
         .route("/upload/*path", post(controllers::upload::upload))
         .nest_service("/static", ServeDir::new("public"))
-        .layer(TraceLayer::new_for_http())
-        .with_state(state);
+        .layer(TraceLayer::new_for_http());
+
+    // Add development routes if watch mode is enabled
+    let app = if state.config.watch_enabled {
+        tracing::info!("Development reload endpoint available at /_dev/reload");
+        app.route("/_dev/reload", get(controllers::dev::dev_reload_stream))
+            .with_state(state)
+    } else {
+        app.with_state(state)
+    };
 
     // Start server
     let addr: SocketAddr = format!("{}:{}", cli.bind, cli.port).parse()?;

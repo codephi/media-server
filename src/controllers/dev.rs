@@ -1,21 +1,17 @@
 use axum::{
     extract::State,
-    response::{
-        sse::{Event, KeepAlive, Sse},
-        Response,
-    },
+    response::sse::{Event, KeepAlive, Sse},
 };
-use futures::stream::{self, Stream};
+use futures::stream::Stream;
 use std::sync::Arc;
 use std::time::Duration;
-use tokio_stream::StreamExt as _;
 
 use crate::controllers::AppState;
-use crate::models::{watcher::WatchEvent, Result};
+use crate::models::watcher::WatchEvent;
 
 pub async fn dev_reload_stream(
     State(state): State<Arc<AppState>>,
-) -> Result<Sse<impl Stream<Item = Result<Event, axum::Error>>>> {
+) -> crate::models::Result<Sse<impl Stream<Item = std::result::Result<Event, axum::Error>>>> {
     if !state.config.watch_enabled {
         return Err(crate::models::AppError::NotFound(
             "Watch mode not enabled".to_string(),
