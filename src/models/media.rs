@@ -24,7 +24,7 @@ impl MediaKind {
             Self::Other => "file.svg",
         }
     }
-    
+
     /// Check if this media type should show thumbnails
     pub fn has_thumbnail(&self) -> bool {
         matches!(self, Self::Image | Self::Video)
@@ -41,21 +41,20 @@ pub fn detect(path: &Path) -> (String, MediaKind) {
             return (mime_str.to_string(), kind);
         }
     }
-    
+
     // Fallback to guessing from extension
-    let mime = mime_guess::from_path(path)
-        .first_or_octet_stream();
-    
+    let mime = mime_guess::from_path(path).first_or_octet_stream();
+
     let mime_str = mime.to_string();
     let kind = media_kind_from_mime(&mime_str);
-    
+
     (mime_str, kind)
 }
 
 /// Determine media kind from MIME type string
 fn media_kind_from_mime(mime: &str) -> MediaKind {
     let mime = mime.to_lowercase();
-    
+
     if mime.starts_with("image/") {
         MediaKind::Image
     } else if mime.starts_with("video/") {
@@ -64,28 +63,20 @@ fn media_kind_from_mime(mime: &str) -> MediaKind {
         MediaKind::Audio
     } else if mime == "application/pdf" {
         MediaKind::Pdf
-    } else if mime.starts_with("text/") 
+    } else if mime.starts_with("text/")
         || mime == "application/json"
         || mime == "application/xml"
-        || mime == "application/javascript" {
+        || mime == "application/javascript"
+    {
         MediaKind::Text
     } else if mime == "application/zip"
         || mime == "application/x-rar-compressed"
         || mime == "application/x-tar"
         || mime == "application/gzip"
-        || mime == "application/x-7z-compressed" {
+        || mime == "application/x-7z-compressed"
+    {
         MediaKind::Archive
     } else {
         MediaKind::Other
     }
-}
-
-/// Check if a path is an image based on extension
-pub fn is_image(path: &Path) -> bool {
-    matches!(detect(path).1, MediaKind::Image)
-}
-
-/// Check if a path is a video based on extension
-pub fn is_video(path: &Path) -> bool {
-    matches!(detect(path).1, MediaKind::Video)
 }

@@ -133,6 +133,21 @@ media-serve/
 └── Cargo.toml
 ```
 
+### Front-end (Tailwind CSS)
+
+As folhas de estilo passam a ser gerenciadas pelo Tailwind CSS 4.1. O CSS gerado é salvo em `public/css/app.css` (mesmo arquivo usado atualmente).
+
+```bash
+# Instalar dependências (apenas na primeira vez)
+npm install
+
+# Gerar CSS otimizado
+npm run build:css
+
+# Ambiente de desenvolvimento com rebuild automático
+npm run watch:css
+```
+
 ### Tecnologias
 
 - **Framework Web**: Axum
@@ -140,6 +155,7 @@ media-serve/
 - **CLI**: Clap
 - **Async Runtime**: Tokio
 - **Thumbnails**: image (Rust) + ffmpeg (vídeos)
+- **CSS Utility**: Tailwind CSS
 - **Logging**: tracing
 
 ## Licença

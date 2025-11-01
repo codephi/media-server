@@ -45,6 +45,8 @@ async fn main() -> anyhow::Result<()> {
             "/video-previews/*path",
             get(controllers::video_previews::video_preview),
         )
+        .route("/search/", get(controllers::search::search_page))
+        .route("/search", get(controllers::search::search))
         .route("/upload/", post(controllers::upload::upload))
         .route("/upload/*path", post(controllers::upload::upload))
         .nest_service("/static", ServeDir::new("public"))

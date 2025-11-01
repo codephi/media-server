@@ -1,3 +1,4 @@
 /target
 .video-previews
 venv
+node_modules/

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Buscar - Media Serve{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <h1 class="text-xl font-semibold">Resultados da busca</h1>
+        <div id="search-summary" class="text-sm text-slate-400"></div>
+    </div>
+
+    <div id="search-results"
+        class="divide-y divide-slate-800 overflow-hidden rounded-xl border border-slate-800/60 bg-slate-900/60">
+        <div class="px-4 py-6 text-center text-sm text-slate-400" id="search-placeholder">
+            {% if q.len() > 0 %}
+            Procurando por "<span class="text-slate-200">{{ q }}</span>"...
+            {% else %}
+            Digite um termo na barra de busca acima e pressione Enter.
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}{% endblock %}

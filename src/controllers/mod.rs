@@ -2,6 +2,7 @@ pub mod browse;
 pub mod content;
 pub mod download;
 pub mod file;
+pub mod search;
 pub mod thumbs;
 pub mod upload;
 pub mod video_previews;

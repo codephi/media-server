@@ -1,0 +1,13 @@
+{
+    "name": "media-serve-assets",
+    "private": true,
+    "version": "0.1.0",
+    "scripts": {
+        "build:css": "tailwindcss -i ./public/css/tailwind.css -o ./public/css/app.css --minify",
+        "watch:css": "tailwindcss -i ./public/css/tailwind.css -o ./public/css/app.css --watch"
+    },
+    "devDependencies": {
+        "tailwindcss": "^4.1.0",
+        "@tailwindcss/cli": "^4.1.0"
+    }
+}

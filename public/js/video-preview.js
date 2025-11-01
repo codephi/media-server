@@ -12,9 +12,35 @@
     let thumbnailsLoaded = false;
     let currentActiveThumbnail = null;
 
+    const revealThumbnailsBar = () => {
+        thumbnailsBar.classList.remove('hidden');
+        thumbnailsBar.classList.add('block');
+    };
+
+    const setLoadingMarkup = () => {
+        thumbnailsScroll.innerHTML = `
+            <div class="loading-thumbnails flex w-full items-center justify-center gap-3 rounded-lg border border-dashed border-slate-700 bg-slate-900/50 px-4 py-6 text-sm text-slate-300">
+                <span class="h-4 w-4 animate-spin rounded-full border-2 border-emerald-400/70 border-t-transparent"></span>
+                <span>Carregando miniaturas...</span>
+            </div>
+        `;
+    };
+
+    const setErrorMarkup = () => {
+        thumbnailsScroll.innerHTML = `
+            <div class="loading-thumbnails error-state flex w-full flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-rose-500/40 bg-rose-500/10 px-4 py-6 text-center text-sm text-rose-200">
+                <div class="error-icon text-2xl">⚠️</div>
+                <div class="error-text space-y-1">
+                    <div>Erro ao gerar miniaturas</div>
+                    <div class="error-subtitle text-xs text-rose-100/80">Verifique se o ffmpeg está instalado e funcionando</div>
+                </div>
+            </div>
+        `;
+    };
+
     // Force show thumbnails bar after 2 seconds if not loaded
     setTimeout(function () {
-        if (thumbnailsBar.style.display === 'none') {
+        if (thumbnailsBar.classList.contains('hidden')) {
             console.log('Forcing thumbnails bar to show...');
             showLoadingState();
             // Try to load again
@@ -41,27 +67,16 @@
             console.error('Error in video thumbnail initialization:', error);
             showErrorState();
         }
-    }); function showLoadingState() {
-        thumbnailsScroll.innerHTML = `
-            <div class="loading-thumbnails">
-                <div class="spinner"></div>
-                <div class="loading-text">Carregando miniaturas...</div>
-            </div>
-        `;
-        thumbnailsBar.style.display = 'block';
+    });
+
+    function showLoadingState() {
+        setLoadingMarkup();
+        revealThumbnailsBar();
     }
 
     function showErrorState() {
-        thumbnailsScroll.innerHTML = `
-            <div class="loading-thumbnails error-state">
-                <div class="error-icon">⚠️</div>
-                <div class="error-text">
-                    <div>Erro ao gerar miniaturas</div>
-                    <div class="error-subtitle">Verifique se o ffmpeg está instalado e funcionando</div>
-                </div>
-            </div>
-        `;
-        thumbnailsBar.style.display = 'block';
+        setErrorMarkup();
+        revealThumbnailsBar();
     }
 
     // Update active thumbnail when video time changes
@@ -131,7 +146,7 @@
             thumbnailsLoaded = true;
             console.log('All thumbnails loaded successfully');
             console.log('thumbnailsScroll children count:', thumbnailsScroll.children.length);
-            console.log('thumbnailsBar display:', thumbnailsBar.style.display);
+            console.log('thumbnailsBar visible:', !thumbnailsBar.classList.contains('hidden'));
             return;
         }        // Fallback: Poll preview info until all thumbnails are generated (for live generation)
         let lastCount = 0;
@@ -191,20 +206,21 @@
         if (thumbnailsScroll.querySelector('.thumbnail-item')) {
             // nothing else to do; thumbnails are visible
         } else {
-            thumbnailsScroll.innerHTML = '<div class="loading-thumbnails">Nenhuma miniatura disponível</div>';
+            thumbnailsScroll.innerHTML = '<div class="loading-thumbnails flex w-full items-center justify-center rounded-lg border border-dashed border-slate-700 bg-slate-900/50 px-4 py-6 text-sm text-slate-300">Nenhuma miniatura disponível</div>';
         }
     }
 
     async function createThumbnailElement(thumbnail) {
         const thumbnailDiv = document.createElement('div');
-        thumbnailDiv.className = 'thumbnail-item';
+        thumbnailDiv.className = 'thumbnail-item group flex w-32 flex-shrink-0 cursor-pointer flex-col gap-2 rounded-lg border border-slate-800/70 bg-slate-950/70 p-2 text-xs text-slate-300 transition hover:border-slate-600 hover:bg-slate-900/80';
         thumbnailDiv.dataset.time = thumbnail.time;
 
         const img = document.createElement('img');
         img.alt = `Preview em ${formatTime(thumbnail.time)}`;
+        img.className = 'h-20 w-full rounded-md object-cover object-center shadow-inner shadow-black/30';
 
         const timeLabel = document.createElement('div');
-        timeLabel.className = 'thumbnail-time';
+        timeLabel.className = 'thumbnail-time text-center font-medium text-slate-200 transition';
         timeLabel.textContent = formatTime(thumbnail.time);
 
         thumbnailDiv.appendChild(img);
@@ -275,13 +291,21 @@
         if (closestThumbnail) {
             // Remove previous active class
             if (currentActiveThumbnail) {
-                currentActiveThumbnail.classList.remove('active');
+                currentActiveThumbnail.classList.remove('active', 'border-emerald-400/70', 'bg-emerald-500/15', 'text-emerald-200');
+                const previousLabel = currentActiveThumbnail.querySelector('.thumbnail-time');
+                if (previousLabel) {
+                    previousLabel.classList.remove('text-emerald-200');
+                }
             }
 
             // Add active class to closest thumbnail
             const thumbnailElement = document.querySelector(`[data-time="${closestThumbnail.time}"]`);
             if (thumbnailElement) {
-                thumbnailElement.classList.add('active');
+                thumbnailElement.classList.add('active', 'border-emerald-400/70', 'bg-emerald-500/15', 'text-emerald-200');
+                const label = thumbnailElement.querySelector('.thumbnail-time');
+                if (label) {
+                    label.classList.add('text-emerald-200');
+                }
                 currentActiveThumbnail = thumbnailElement;
             }
         }
