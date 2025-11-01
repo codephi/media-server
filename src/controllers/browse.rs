@@ -3,7 +3,7 @@ use axum::{
     extract::{Path, Query, State},
     response::{IntoResponse, Redirect},
 };
-use serde::Deserialize;
+use serde::{Deserialize, Deserializer};
 use std::sync::Arc;
 
 use crate::controllers::AppState;
@@ -13,12 +13,27 @@ use crate::models::{fs, media, Result};
 pub struct BrowseQuery {
     #[serde(default = "default_view")]
     view: String,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_bool_from_anything")]
     show_hidden: Option<bool>,
 }
 
 fn default_view() -> String {
     "list".to_string()
+}
+
+fn deserialize_bool_from_anything<'de, D>(deserializer: D) -> std::result::Result<Option<bool>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let s: Option<String> = Option::deserialize(deserializer)?;
+    match s {
+        None => Ok(None),
+        Some(s) => match s.as_str() {
+            "true" | "1" | "yes" | "on" => Ok(Some(true)),
+            "false" | "0" | "no" | "off" | "" => Ok(Some(false)),
+            _ => Ok(None),
+        },
+    }
 }
 
 #[derive(Template)]
