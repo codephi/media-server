@@ -38,6 +38,10 @@ pub async fn dev_reload_stream(
                             tracing::info!("Sending reload event to browser");
                             yield Ok(Event::default().event("reload").data("reload"));
                         }
+                        Ok(WatchEvent::TemplateChanged) => {
+                            tracing::warn!("Template changed - sending template-changed event");
+                            yield Ok(Event::default().event("template-changed").data("template-changed"));
+                        }
                         Err(tokio::sync::broadcast::error::RecvError::Closed) => {
                             tracing::info!("Watch channel closed, ending stream");
                             break;

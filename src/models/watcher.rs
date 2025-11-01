@@ -9,6 +9,7 @@ use tokio::sync::broadcast;
 #[derive(Debug, Clone)]
 pub enum WatchEvent {
     Reload,
+    TemplateChanged,
 }
 
 pub struct FileWatcher {
@@ -53,17 +54,36 @@ impl FileWatcher {
         let mut debounce_timer = tokio::time::Instant::now();
         let debounce_duration = Duration::from_millis(100);
 
+        // Show warning about template compilation
+        tracing::warn!("⚠️  Template Hot-Reload Limitation:");
+        tracing::warn!("   Askama templates are compiled at build-time, not runtime.");
+        tracing::warn!("   Changes to .html templates require recompilation to take effect.");
+        tracing::warn!("   🚀 For better development experience, use: ./dev.sh");
+        tracing::warn!("   Or install cargo-watch: cargo install cargo-watch");
+
         loop {
             match self.receiver.try_recv() {
                 Ok(Ok(event)) => {
-                    if self.should_reload(&event) {
+                    let (should_reload, is_template) = self.categorize_event(&event);
+                    
+                    if should_reload {
                         let now = tokio::time::Instant::now();
                         if now.duration_since(debounce_timer) > debounce_duration {
                             debounce_timer = now;
 
-                            tracing::info!("File change detected: {:?}", event.paths);
-                            if let Err(e) = broadcast_tx.send(WatchEvent::Reload) {
-                                tracing::error!("Failed to send reload event: {}", e);
+                            if is_template {
+                                tracing::warn!("🔄 Template change detected: {:?}", event.paths);
+                                tracing::warn!("   ⚠️  Templates require recompilation to update!");
+                                tracing::warn!("   💡 Restart with: ./dev.sh for automatic recompilation");
+                                
+                                if let Err(e) = broadcast_tx.send(WatchEvent::TemplateChanged) {
+                                    tracing::error!("Failed to send template change event: {}", e);
+                                }
+                            } else {
+                                tracing::info!("📁 Asset change detected: {:?}", event.paths);
+                                if let Err(e) = broadcast_tx.send(WatchEvent::Reload) {
+                                    tracing::error!("Failed to send reload event: {}", e);
+                                }
                             }
                         }
                     }
@@ -83,20 +103,33 @@ impl FileWatcher {
         }
     }
 
-    fn should_reload(&self, event: &Event) -> bool {
+    fn categorize_event(&self, event: &Event) -> (bool, bool) {
         // Only react to write/create/remove events
         match &event.kind {
             EventKind::Create(_) | EventKind::Modify(_) | EventKind::Remove(_) => {}
-            _ => return false,
+            _ => return (false, false),
         }
 
+        let mut should_reload = false;
+        let mut is_template = false;
+
         // Check if any path matches our criteria
-        event.paths.iter().any(|path| {
+        for path in &event.paths {
             if let Some(extension) = path.extension().and_then(|ext| ext.to_str()) {
-                matches!(extension, "html" | "css" | "js" | "ts")
-            } else {
-                false
+                match extension {
+                    "html" => {
+                        should_reload = true;
+                        is_template = true;
+                    }
+                    "css" | "js" | "ts" => {
+                        should_reload = true;
+                        // is_template remains false
+                    }
+                    _ => {}
+                }
             }
-        })
+        }
+
+        (should_reload, is_template)
     }
 }
