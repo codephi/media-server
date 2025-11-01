@@ -41,7 +41,7 @@
             console.error('Error in video thumbnail initialization:', error);
             showErrorState();
         }
-    });    function showLoadingState() {
+    }); function showLoadingState() {
         thumbnailsScroll.innerHTML = `
             <div class="loading-thumbnails">
                 <div class="spinner"></div>
@@ -104,7 +104,7 @@
         // Since thumbnails are already available (based on preview info), skip polling
         if (previewInfo.thumbnails && previewInfo.thumbnails.length > 0) {
             console.log('Thumbnails already available, creating elements directly...');
-            
+
             // Keep the loading state while creating thumbnails
             // Clear loading and create thumbnail elements after all are ready
             const thumbnailElements = [];
