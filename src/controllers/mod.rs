@@ -19,17 +19,17 @@ pub struct AppState {
 
 impl AppState {
     pub fn new(config: crate::models::AppConfig) -> Arc<Self> {
-        Arc::new(Self { 
+        Arc::new(Self {
             config,
             watch_sender: None,
         })
     }
-    
+
     pub fn new_with_watcher(
         config: crate::models::AppConfig,
         watch_sender: tokio::sync::broadcast::Sender<crate::models::watcher::WatchEvent>,
     ) -> Arc<Self> {
-        Arc::new(Self { 
+        Arc::new(Self {
             config,
             watch_sender: Some(watch_sender),
         })

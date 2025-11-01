@@ -2,7 +2,11 @@ use clap::{Parser, ValueHint};
 use std::path::PathBuf;
 
 #[derive(Parser, Debug, Clone)]
-#[command(name = "media-serve", version, about = "A media file server with MVC architecture")]
+#[command(
+    name = "media-serve",
+    version,
+    about = "A media file server with MVC architecture"
+)]
 pub struct Cli {
     /// Directory to serve
     #[arg(value_name = "BASE_DIR", value_hint = ValueHint::DirPath)]
@@ -54,7 +58,7 @@ impl AppConfig {
         }
 
         let base_dir_canonical = cli.base_dir.canonicalize()?;
-        
+
         // Check for ffmpeg availability
         let ffmpeg_available = std::process::Command::new("ffmpeg")
             .arg("-version")

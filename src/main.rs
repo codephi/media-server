@@ -29,8 +29,29 @@ async fn main() -> anyhow::Result<()> {
     );
     tracing::info!("ffmpeg available: {}", config.ffmpeg_available);
 
-    // Create app state
-    let state = controllers::AppState::new(config);
+    // Setup file watcher if enabled
+    let state = if config.watch_enabled {
+        tracing::info!("Watch mode enabled - monitoring file changes");
+        
+        match models::watcher::FileWatcher::new() {
+            Ok((file_watcher, watch_sender)) => {
+                let state = controllers::AppState::new_with_watcher(config, watch_sender.clone());
+                
+                // Start the file watcher in background
+                tokio::spawn(async move {
+                    file_watcher.run(watch_sender).await;
+                });
+                
+                state
+            }
+            Err(e) => {
+                tracing::error!("Failed to start file watcher: {}", e);
+                controllers::AppState::new(config)
+            }
+        }
+    } else {
+        controllers::AppState::new(config)
+    };
 
     // Build router
     let app = Router::new()
