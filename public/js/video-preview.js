@@ -16,30 +16,53 @@
     setTimeout(function () {
         if (thumbnailsBar.style.display === 'none') {
             console.log('Forcing thumbnails bar to show...');
-            thumbnailsBar.style.display = 'block';
-            if (!thumbnailsLoaded) {
-                thumbnailsScroll.innerHTML = '<div class="loading-thumbnails">Carregando miniaturas...</div>';
-                // Try to load again
-                loadPreviewInfo().then(createThumbnailsBar).catch(console.error);
-            }
+            showLoadingState();
+            // Try to load again
+            loadPreviewInfo()
+                .then(createThumbnailsBar)
+                .catch(error => {
+                    console.error('Error in forced loading attempt:', error);
+                    showErrorState();
+                });
         }
     }, 2000);
 
     // Load preview info and create thumbnails when video metadata is loaded
     video.addEventListener('loadedmetadata', async function () {
         console.log('Video metadata loaded, initializing thumbnails...');
+
+        // Show loading immediately
+        showLoadingState();
+
         try {
             await loadPreviewInfo();
             await createThumbnailsBar();
-            thumbnailsBar.style.display = 'block';
-            console.log('Thumbnails bar should now be visible');
         } catch (error) {
-            console.warn('Não foi possível carregar miniaturas:', error);
-            // Show the bar anyway with an error message
-            thumbnailsScroll.innerHTML = '<div class="loading-thumbnails">Erro ao carregar miniaturas de preview</div>';
-            thumbnailsBar.style.display = 'block';
+            console.error('Error in video thumbnail initialization:', error);
+            showErrorState();
         }
-    });
+    });    function showLoadingState() {
+        thumbnailsScroll.innerHTML = `
+            <div class="loading-thumbnails">
+                <div class="spinner"></div>
+                <div class="loading-text">Carregando miniaturas...</div>
+            </div>
+        `;
+        thumbnailsBar.style.display = 'block';
+    }
+
+    function showErrorState() {
+        thumbnailsScroll.innerHTML = `
+            <div class="loading-thumbnails error-state">
+                <div class="error-icon">⚠️</div>
+                <div class="error-text">
+                    <div>Erro ao gerar miniaturas</div>
+                    <div class="error-subtitle">Verifique se o ffmpeg está instalado e funcionando</div>
+                </div>
+            </div>
+        `;
+        thumbnailsBar.style.display = 'block';
+    }
 
     // Update active thumbnail when video time changes
     video.addEventListener('timeupdate', function () {
@@ -48,33 +71,128 @@
     });
 
     async function loadPreviewInfo() {
-        const response = await fetch(`/video-previews/${videoPath}`);
+        console.log('Loading preview info for:', videoPath);
+        const url = `/video-previews/${videoPath}`;
+        console.log('Fetching:', url);
+
+        const response = await fetch(url);
+        console.log('Response status:', response.status);
+
         if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
+            console.error('Failed to load preview info:', response.status, response.statusText);
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
+
         previewInfo = await response.json();
+        console.log('Preview info loaded:', previewInfo);
     }
 
     async function createThumbnailsBar() {
-        if (!previewInfo || thumbnailsLoaded) return;
-
-        // Show loading state
-        thumbnailsScroll.innerHTML = `
-            <div class="loading-thumbnails">
-                <div class="spinner"></div>
-                Carregando miniaturas...
-            </div>
-        `;
-
-        // Clear loading and create thumbnail elements
-        thumbnailsScroll.innerHTML = '';
-
-        for (const thumbnail of previewInfo.thumbnails) {
-            const thumbnailElement = await createThumbnailElement(thumbnail);
-            thumbnailsScroll.appendChild(thumbnailElement);
+        console.log('Starting createThumbnailsBar...');
+        if (!previewInfo || thumbnailsLoaded) {
+            console.log('Skipping createThumbnailsBar - previewInfo:', !!previewInfo, 'thumbnailsLoaded:', thumbnailsLoaded);
+            return;
         }
 
-        thumbnailsLoaded = true;
+        // Use expected_count if available, otherwise estimate
+        const totalEstimated = previewInfo.expected_count || Math.max(1, Math.ceil(previewInfo.duration / previewInfo.interval));
+        console.log('Total estimated thumbnails:', totalEstimated);
+
+        // Container to track created thumbnails by time
+        const createdTimes = new Set();
+
+        // Since thumbnails are already available (based on preview info), skip polling
+        if (previewInfo.thumbnails && previewInfo.thumbnails.length > 0) {
+            console.log('Thumbnails already available, creating elements directly...');
+            
+            // Keep the loading state while creating thumbnails
+            // Clear loading and create thumbnail elements after all are ready
+            const thumbnailElements = [];
+
+            for (let i = 0; i < previewInfo.thumbnails.length; i++) {
+                const thumbnail = previewInfo.thumbnails[i];
+                console.log(`Creating thumbnail ${i + 1}/${previewInfo.thumbnails.length} for time ${thumbnail.time}s`);
+
+                try {
+                    const thumbnailElement = await createThumbnailElement(thumbnail);
+                    thumbnailElements.push(thumbnailElement);
+                    console.log(`Thumbnail element created for time ${thumbnail.time}s`);
+                } catch (error) {
+                    console.error(`Error creating thumbnail for time ${thumbnail.time}:`, error);
+                }
+            }
+
+            // Replace loading with all thumbnails at once
+            thumbnailsScroll.innerHTML = '';
+            thumbnailElements.forEach(element => {
+                thumbnailsScroll.appendChild(element);
+            });
+
+            thumbnailsLoaded = true;
+            console.log('All thumbnails loaded successfully');
+            console.log('thumbnailsScroll children count:', thumbnailsScroll.children.length);
+            console.log('thumbnailsBar display:', thumbnailsBar.style.display);
+            return;
+        }        // Fallback: Poll preview info until all thumbnails are generated (for live generation)
+        let lastCount = 0;
+        let pollAttempts = 0;
+        while (true) {
+            pollAttempts++;
+            console.log(`Poll attempt ${pollAttempts}, lastCount: ${lastCount}`);
+
+            try {
+                const resp = await fetch(`/video-previews/${videoPath}`);
+                if (resp.ok) {
+                    previewInfo = await resp.json();
+                    console.log(`Updated previewInfo: ${previewInfo.thumbnails.length} thumbnails available`);
+                }
+            } catch (err) {
+                console.warn('Erro ao obter progresso das miniaturas:', err);
+            }
+
+            const generated = (previewInfo && previewInfo.thumbnails) ? previewInfo.thumbnails.length : 0;
+            const total = previewInfo && previewInfo.expected_count ? previewInfo.expected_count : totalEstimated;
+
+            // Append any new thumbnails
+            if (generated > 0) {
+                // Ensure thumbnailsScroll contains the thumbnail elements (remove loading UI)
+                if (!thumbnailsScroll.querySelector('.thumbnail-item')) {
+                    thumbnailsScroll.innerHTML = '';
+                }
+
+                for (const thumb of previewInfo.thumbnails) {
+                    if (!createdTimes.has(String(thumb.time))) {
+                        const el = await createThumbnailElement(thumb);
+                        thumbnailsScroll.appendChild(el);
+                        createdTimes.add(String(thumb.time));
+                    }
+                }
+            }
+
+            // Stop polling if we've reached expected total or generation seems finished
+            if (generated >= total && total > 0) {
+                thumbnailsLoaded = true;
+                // remove loading overlay if any
+                // All thumbnails generated
+                break;
+            }
+
+            // if no progress for a while, break to avoid infinite loop
+            if (generated == lastCount) {
+                // wait a bit and try again
+                await new Promise(r => setTimeout(r, 600));
+            } else {
+                lastCount = generated;
+                await new Promise(r => setTimeout(r, 300));
+            }
+        }
+
+        // final cleanup: hide loading UI if thumbnails exist
+        if (thumbnailsScroll.querySelector('.thumbnail-item')) {
+            // nothing else to do; thumbnails are visible
+        } else {
+            thumbnailsScroll.innerHTML = '<div class="loading-thumbnails">Nenhuma miniatura disponível</div>';
+        }
     }
 
     async function createThumbnailElement(thumbnail) {
@@ -99,10 +217,14 @@
 
         // Load thumbnail image
         try {
+            console.log(`Fetching thumbnail image for time ${thumbnail.time}s...`);
             const response = await fetch(`/video-previews/${videoPath}?time=${thumbnail.time}`);
+            console.log(`Image response for ${thumbnail.time}s: ${response.status}`);
+
             if (response.ok) {
                 const blob = await response.blob();
                 img.src = URL.createObjectURL(blob);
+                console.log(`Image loaded successfully for ${thumbnail.time}s`);
 
                 // Clean up blob URL when image is loaded
                 img.onload = function () {

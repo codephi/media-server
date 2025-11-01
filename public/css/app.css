@@ -282,6 +282,8 @@ body {
 .audio-player audio {
     width: 100%;
     border-radius: 4px;
+    height: auto;
+    max-height: 50vh;
 }
 
 /* Video thumbnails bar */
@@ -368,17 +370,87 @@ body {
     text-align: center;
     color: var(--text-secondary);
     padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
 }
 
 .loading-thumbnails .spinner {
     display: inline-block;
-    width: 20px;
-    height: 20px;
-    border: 2px solid var(--border-color);
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--border-color);
     border-radius: 50%;
     border-top-color: var(--accent);
     animation: spin 1s ease-in-out infinite;
-    margin-right: 0.5rem;
+}
+
+.loading-text {
+    display: inline-block;
+    vertical-align: middle;
+    text-align: left;
+    margin-left: 0.5rem;
+    color: var(--text-secondary);
+}
+
+.loading-text .loading-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+
+.loading-thumbnails .loading-text {
+    font-size: 1.5rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.loading-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.loading-subtitle {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+.progress-bar {
+    width: 300px;
+    height: 6px;
+    background: var(--bg-secondary);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #6bb6ff);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.error-state {
+    color: #ff6b6b;
+}
+
+.error-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.error-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.error-subtitle {
+    font-size: 0.9rem;
+    opacity: 0.7;
 }
 
 @keyframes spin {

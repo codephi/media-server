@@ -16,6 +16,8 @@ pub struct VideoPreviewInfo {
     pub duration: f64,
     pub interval: f64,
     pub thumbnails: Vec<VideoThumbnail>,
+    /// Número esperado de miniaturas (estimativa) — útil para progresso
+    pub expected_count: usize,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -88,8 +90,24 @@ pub async fn get_or_build_previews(
     let max_thumbnails = 100;
     let interval = (duration / max_thumbnails as f64).max(1.0);
 
-    // Generate thumbnails
-    let mut thumbnails = Vec::new();
+    // Estimate expected count
+    let expected_count = ((duration / interval).ceil() as usize).max(1);
+
+    // Prepare preview info and write initial info.json so frontend can poll progress
+    let mut preview_info = VideoPreviewInfo {
+        duration,
+        interval,
+        thumbnails: Vec::new(),
+        expected_count,
+    };
+
+    // Write initial info.json (atomic write to temp file then rename)
+    let init_json = serde_json::to_string_pretty(&preview_info)?;
+    let tmp_info = info_file.with_extension("json.tmp");
+    tokio::fs::write(&tmp_info, init_json).await?;
+    let _ = tokio::fs::rename(&tmp_info, &info_file).await?;
+
+    // Generate thumbnails and update info.json incrementally
     let mut current_time = 0.0;
 
     while current_time < duration {
@@ -98,10 +116,19 @@ pub async fn get_or_build_previews(
 
         match generate_video_preview_thumbnail(&abs_path, &thumb_path, current_time).await {
             Ok(_) => {
-                thumbnails.push(VideoThumbnail {
+                preview_info.thumbnails.push(VideoThumbnail {
                     time: current_time,
-                    filename,
+                    filename: filename.clone(),
                 });
+
+                // write progress to info.json (atomic)
+                let info_json = serde_json::to_string_pretty(&preview_info)?;
+                let tmp = info_file.with_extension("json.tmp");
+                if let Err(e) = tokio::fs::write(&tmp, info_json).await {
+                    tracing::warn!("Falha ao escrever info temporário: {}", e);
+                } else if let Err(e) = tokio::fs::rename(&tmp, &info_file).await {
+                    tracing::warn!("Falha ao renomear info temporário: {}", e);
+                }
             }
             Err(e) => {
                 tracing::warn!(
@@ -114,16 +141,6 @@ pub async fn get_or_build_previews(
 
         current_time += interval;
     }
-
-    let preview_info = VideoPreviewInfo {
-        duration,
-        interval,
-        thumbnails,
-    };
-
-    // Save preview info
-    let info_json = serde_json::to_string_pretty(&preview_info)?;
-    tokio::fs::write(&info_file, info_json).await?;
 
     Ok(Some(preview_info))
 }

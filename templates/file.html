@@ -12,20 +12,20 @@
 <div class="file-page">
     <div class="file-info">
         <h2>{{ file_info.name }}</h2>
-        <table class="info-table">
-            <tr>
-                <th>Tamanho:</th>
-                <td>{{ formatted_size }}</td>
-            </tr>
-            <tr>
-                <th>Modificado:</th>
-                <td>{{ formatted_modified }}</td>
-            </tr>
-            <tr>
-                <th>Tipo MIME:</th>
-                <td>{{ mime_type }}</td>
-            </tr>
-        </table>
+        <div class="info-list">
+            <div class="info-item">
+                <span class="info-label">Tamanho:</span>
+                <span class="info-value">{{ formatted_size }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Modificado:</span>
+                <span class="info-value">{{ formatted_modified }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Tipo MIME:</span>
+                <span class="info-value">{{ mime_type }}</span>
+            </div>
+        </div>
     </div>
 
     <div class="file-content">
