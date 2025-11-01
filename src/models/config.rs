@@ -27,6 +27,10 @@ pub struct Cli {
     /// Show hidden files by default
     #[arg(long = "show-hidden")]
     pub show_hidden: bool,
+
+    /// Enable file watching for auto-reload during development
+    #[arg(long)]
+    pub watch: bool,
 }
 
 #[derive(Clone, Debug)]
@@ -36,6 +40,7 @@ pub struct AppConfig {
     pub thumb_size: u32,
     pub show_hidden: bool,
     pub ffmpeg_available: bool,
+    pub watch_enabled: bool,
 }
 
 impl AppConfig {
@@ -67,6 +72,7 @@ impl AppConfig {
             thumb_size: cli.thumb_size,
             show_hidden: cli.show_hidden,
             ffmpeg_available,
+            watch_enabled: cli.watch,
         })
     }
 }

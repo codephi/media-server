@@ -10,9 +10,9 @@
 {% endblock %}
 
 {% block content %}
-<div class="grid gap-8 lg:grid-cols-5">
+<div class="grid gap-8 lg:grid-cols-6">
     <section
-        class="space-y-6 rounded-2xl border border-slate-800/60 bg-slate-900/60 p-6 shadow-inner shadow-black/40 lg:col-span-2">
+        class="space-y-6 rounded-2xl border border-slate-800/60 bg-slate-900/60 p-6 shadow-inner shadow-black/40 lg:col-span-1">
         <div class="space-y-2">
             <h2 class="truncate text-2xl font-semibold text-slate-100">{{ file_info.name }}</h2>
             <p class="text-sm text-slate-400">Informações do arquivo</p>
@@ -39,7 +39,7 @@
         </dl>
     </section>
 
-    <section class="space-y-6 lg:col-span-3">
+    <section class="space-y-6 lg:col-span-4">
         {% match media_kind %}
         {% when crate::models::media::MediaKind::Image %}
         <div class="overflow-hidden rounded-2xl border border-slate-800/60 bg-slate-900/70 p-4">
@@ -85,7 +85,7 @@
         {% when _ %}
         <div
             class="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-slate-700 bg-slate-900/50 p-10 text-center text-sm text-slate-400">
-            <iconify-icon icon="{{ media_kind.icon_name() }}" class="text-6xl text-slate-400 opacity-70"></iconify-icon>
+            <img src="/static/icons/{{ media_kind.icon_name() }}" alt="File icon" class="h-16 w-16 opacity-70">
             <p>Visualização não disponível para este tipo de arquivo.</p>
         </div>
         {% endmatch %}
