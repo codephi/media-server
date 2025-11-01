@@ -1,0 +1,322 @@
+/* Quake Terminal Styles */
+.quake-terminal {
+    position: fixed;
+    bottom: -400px;
+    left: 0;
+    right: 0;
+    height: 400px;
+    background: #1e1e1e;
+    border-top: 2px solid #333;
+    box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.5);
+    transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+}
+
+.quake-terminal.visible {
+    bottom: 0;
+}
+
+.quake-terminal.minimized {
+    height: 40px !important;
+}
+
+.quake-terminal.minimized .terminal-content,
+.quake-terminal.minimized .terminal-resize-handle {
+    display: none;
+}
+
+.quake-terminal.maximized {
+    height: calc(100vh - 40px) !important;
+    top: 40px;
+    bottom: auto;
+}
+
+/* Terminal Header */
+.terminal-header {
+    background: #2d2d2d;
+    height: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10px;
+    user-select: none;
+    border-bottom: 1px solid #444;
+}
+
+/* Terminal Tabs */
+.terminal-tabs {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex: 1;
+}
+
+.tabs-list {
+    display: flex;
+    gap: 2px;
+    overflow-x: auto;
+    max-width: calc(100% - 40px);
+}
+
+.tabs-list::-webkit-scrollbar {
+    height: 4px;
+}
+
+.tabs-list::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 2px;
+}
+
+.terminal-tab {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    background: #1e1e1e;
+    border: 1px solid #444;
+    border-radius: 4px 4px 0 0;
+    cursor: pointer;
+    min-width: 100px;
+    max-width: 200px;
+    transition: background 0.2s;
+    color: #d4d4d4;
+    font-size: 13px;
+}
+
+.terminal-tab:hover {
+    background: #252525;
+}
+
+.terminal-tab.active {
+    background: #1e1e1e;
+    border-bottom-color: #1e1e1e;
+    color: #fff;
+}
+
+.tab-title {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    outline: none;
+    padding: 2px 4px;
+}
+
+.tab-title[contenteditable="true"] {
+    background: #333;
+    border-radius: 2px;
+}
+
+.tab-close {
+    background: none;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    padding: 0;
+    width: 16px;
+    height: 16px;
+    line-height: 14px;
+    text-align: center;
+    border-radius: 2px;
+    transition: background 0.2s, color 0.2s;
+}
+
+.tab-close:hover {
+    background: #ff4444;
+    color: #fff;
+}
+
+.add-tab-btn {
+    background: none;
+    border: 1px solid #444;
+    color: #999;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 16px;
+    line-height: 1;
+    transition: all 0.2s;
+}
+
+.add-tab-btn:hover {
+    background: #333;
+    color: #fff;
+    border-color: #555;
+}
+
+/* Terminal Controls */
+.terminal-controls {
+    display: flex;
+    gap: 5px;
+}
+
+.terminal-controls button {
+    background: none;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    padding: 5px 10px;
+    font-size: 14px;
+    border-radius: 3px;
+    transition: background 0.2s, color 0.2s;
+}
+
+.terminal-controls button:hover {
+    background: #333;
+    color: #fff;
+}
+
+.terminal-minimize:hover {
+    background: #f39c12;
+}
+
+.terminal-maximize:hover {
+    background: #27ae60;
+}
+
+.terminal-close:hover {
+    background: #e74c3c;
+}
+
+/* Terminal Content */
+.terminal-content {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    background: #1e1e1e;
+}
+
+.terminal-instance {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* Resize Handle */
+.terminal-resize-handle {
+    height: 5px;
+    background: #333;
+    cursor: ns-resize;
+    position: relative;
+    transition: background 0.2s;
+}
+
+.terminal-resize-handle:hover {
+    background: #555;
+}
+
+.terminal-resize-handle::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 30px;
+    height: 2px;
+    background: #666;
+    border-radius: 1px;
+}
+
+/* Toggle Button */
+.terminal-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #2d2d2d;
+    color: #fff;
+    border: 2px solid #444;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s;
+    z-index: 9999;
+}
+
+.terminal-toggle:hover {
+    background: #333;
+    border-color: #555;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+.quake-terminal.visible ~ .terminal-toggle {
+    opacity: 0.5;
+}
+
+/* Override xterm.js styles for better integration */
+.terminal-instance .xterm {
+    padding: 10px;
+    height: 100%;
+}
+
+.terminal-instance .xterm-viewport {
+    background-color: #1e1e1e !important;
+}
+
+.terminal-instance .xterm-screen {
+    height: 100%;
+}
+
+/* Animations */
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(0);
+    }
+    to {
+        transform: translateY(100%);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .quake-terminal {
+        height: 300px;
+    }
+    
+    .terminal-tab {
+        min-width: 80px;
+        font-size: 12px;
+    }
+    
+    .terminal-toggle {
+        bottom: 10px;
+        right: 10px;
+        padding: 8px 15px;
+        font-size: 12px;
+    }
+}
+
+/* Dark scrollbar for terminal */
+.terminal-content ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.terminal-content ::-webkit-scrollbar-track {
+    background: #1e1e1e;
+}
+
+.terminal-content ::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 5px;
+}
+
+.terminal-content ::-webkit-scrollbar-thumb:hover {
+    background: #666;
+}

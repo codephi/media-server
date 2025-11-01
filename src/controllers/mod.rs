@@ -4,6 +4,7 @@ pub mod download;
 pub mod file;
 pub mod thumbs;
 pub mod upload;
+pub mod video_previews;
 
 use std::sync::Arc;
 

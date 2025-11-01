@@ -27,45 +27,54 @@
             </tr>
         </table>
     </div>
-    
+
     <div class="file-content">
         {% match media_kind %}
-            {% when crate::models::media::MediaKind::Image %}
-                <div class="image-viewer">
-                    <img id="viewer-image" src="/content/{{ encoded_path }}" alt="{{ file_info.name }}">
+        {% when crate::models::media::MediaKind::Image %}
+        <div class="image-viewer">
+            <img id="viewer-image" src="/content/{{ encoded_path }}" alt="{{ file_info.name }}">
+        </div>
+
+        {% when crate::models::media::MediaKind::Video %}
+        <div class="video-container">
+            <div class="video-player">
+                <video id="main-video" controls preload="metadata">
+                    <source src="/content/{{ encoded_path }}" type="{{ mime_type }}">
+                    Seu navegador não suporta a reprodução de vídeo.
+                </video>
+            </div>
+            <div id="video-thumbnails-bar" class="video-thumbnails-bar" style="display: none;">
+                <div class="thumbnails-container">
+                    <div class="thumbnails-scroll">
+                        <!-- Miniaturas serão carregadas dinamicamente aqui -->
+                    </div>
                 </div>
-            
-            {% when crate::models::media::MediaKind::Video %}
-                <div class="video-player">
-                    <video controls preload="metadata">
-                        <source src="/content/{{ encoded_path }}" type="{{ mime_type }}">
-                        Seu navegador não suporta a reprodução de vídeo.
-                    </video>
-                </div>
-            
-            {% when crate::models::media::MediaKind::Audio %}
-                <div class="audio-player">
-                    <audio controls preload="metadata">
-                        <source src="/content/{{ encoded_path }}" type="{{ mime_type }}">
-                        Seu navegador não suporta a reprodução de áudio.
-                    </audio>
-                </div>
-            
-            {% when crate::models::media::MediaKind::Pdf %}
-                <div class="pdf-viewer">
-                    <iframe src="/content/{{ encoded_path }}" width="100%" height="600px"></iframe>
-                </div>
-            
-            {% when crate::models::media::MediaKind::Text %}
-                <div class="text-viewer">
-                    <iframe src="/content/{{ encoded_path }}" width="100%" height="600px"></iframe>
-                </div>
-            
-            {% when _ %}
-                <div class="file-preview">
-                    <img src="/static/icons/{{ media_kind.icon_name() }}" alt="File icon" class="large-icon">
-                    <p>Visualização não disponível para este tipo de arquivo.</p>
-                </div>
+            </div>
+        </div>
+
+        {% when crate::models::media::MediaKind::Audio %}
+        <div class="audio-player">
+            <audio controls preload="metadata">
+                <source src="/content/{{ encoded_path }}" type="{{ mime_type }}">
+                Seu navegador não suporta a reprodução de áudio.
+            </audio>
+        </div>
+
+        {% when crate::models::media::MediaKind::Pdf %}
+        <div class="pdf-viewer">
+            <iframe src="/content/{{ encoded_path }}" width="100%" height="600px"></iframe>
+        </div>
+
+        {% when crate::models::media::MediaKind::Text %}
+        <div class="text-viewer">
+            <iframe src="/content/{{ encoded_path }}" width="100%" height="600px"></iframe>
+        </div>
+
+        {% when _ %}
+        <div class="file-preview">
+            <img src="/static/icons/{{ media_kind.icon_name() }}" alt="File icon" class="large-icon">
+            <p>Visualização não disponível para este tipo de arquivo.</p>
+        </div>
         {% endmatch %}
     </div>
 </div>
@@ -73,8 +82,13 @@
 
 {% block scripts %}
 {% match media_kind %}
-    {% when crate::models::media::MediaKind::Image %}
-        <script src="/static/js/viewer.js"></script>
-    {% when _ %}
+{% when crate::models::media::MediaKind::Image %}
+<script src="/static/js/viewer.js"></script>
+{% when crate::models::media::MediaKind::Video %}
+<script>
+    const videoPath = "{{ encoded_path }}";
+</script>
+<script src="/static/js/video-preview.js"></script>
+{% when _ %}
 {% endmatch %}
 {% endblock %}
