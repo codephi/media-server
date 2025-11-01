@@ -21,7 +21,9 @@ fn default_view() -> String {
     "list".to_string()
 }
 
-fn deserialize_bool_from_anything<'de, D>(deserializer: D) -> std::result::Result<Option<bool>, D::Error>
+fn deserialize_bool_from_anything<'de, D>(
+    deserializer: D,
+) -> std::result::Result<Option<bool>, D::Error>
 where
     D: Deserializer<'de>,
 {
@@ -67,20 +69,20 @@ impl From<fs::Item> for ItemView {
         } else {
             item.rel_path.clone()
         };
-        
+
         let (_, media_kind) = if !item.is_dir {
             let full_path = std::path::Path::new(&item.rel_path);
             media::detect(full_path)
         } else {
             ("".to_string(), media::MediaKind::Other)
         };
-        
+
         let icon = if item.is_dir {
-            "folder.svg".to_string()
+            media::folder_icon().to_string()
         } else {
             media_kind.icon_name().to_string()
         };
-        
+
         Self {
             name: item.name,
             encoded_path: fs::url_encode_path(&path),
@@ -113,14 +115,14 @@ pub async fn browse(
     let path = path.map(|Path(p)| p).unwrap_or_default();
     let path = path.trim_matches('/');
     let show_hidden = query.show_hidden.unwrap_or(state.config.show_hidden);
-    
+
     // List directory contents
     let items = fs::list_dir(&state.config.base_dir_canonical, path, show_hidden)?;
     let breadcrumbs = fs::breadcrumbs(path);
-    
+
     // Convert items to view models
     let items: Vec<ItemView> = items.into_iter().map(ItemView::from).collect();
-    
+
     let template = BrowseTemplate {
         items,
         breadcrumbs,
@@ -129,6 +131,6 @@ pub async fn browse(
         show_hidden,
         thumb_size: state.config.thumb_size,
     };
-    
+
     Ok(template)
 }

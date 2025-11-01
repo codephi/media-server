@@ -8,21 +8,15 @@
         <!-- Ícone do erro -->
         <div
             class="mx-auto mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10 ring-1 ring-red-500/20">
-            <svg class="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                {% if error_type == "permission" %}
-                <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                {% else if error_type == "not_found" %}
-                <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M15.75 15.75l-2.489-2.489m0 0a3.375 3.375 0 10-4.773-4.773 3.375 3.375 0 004.774 4.774zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                {% else if error_type == "forbidden" %}
-                <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L5.636 5.636" />
-                {% else %}
-                <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                {% endif %}
-            </svg>
+            {% if error_type == "permission" %}
+            <iconify-icon icon="heroicons:lock-closed" class="text-2xl text-red-400"></iconify-icon>
+            {% else if error_type == "not_found" %}
+            <iconify-icon icon="heroicons:magnifying-glass" class="text-2xl text-red-400"></iconify-icon>
+            {% else if error_type == "forbidden" %}
+            <iconify-icon icon="heroicons:no-symbol" class="text-2xl text-red-400"></iconify-icon>
+            {% else %}
+            <iconify-icon icon="heroicons:exclamation-triangle" class="text-2xl text-red-400"></iconify-icon>
+            {% endif %}
         </div>
 
         <!-- Título do erro -->
@@ -57,7 +51,10 @@
         <div class="space-y-3">
             {% if !suggestions.is_empty() %}
             <div class="rounded-lg border border-slate-800/60 bg-slate-900/30 p-4">
-                <h3 class="mb-2 text-sm font-medium text-white">💡 Sugestões:</h3>
+                <h3 class="mb-2 text-sm font-medium text-white flex items-center gap-2">
+                    <iconify-icon icon="heroicons:light-bulb" class="text-yellow-400"></iconify-icon>
+                    Sugestões:
+                </h3>
                 <ul class="space-y-1 text-sm text-slate-300">
                     {% for suggestion in suggestions %}
                     <li class="flex items-start gap-2">
@@ -72,14 +69,22 @@
             <!-- Botões de ação -->
             <div class="flex flex-col gap-3 sm:flex-row sm:justify-center">
                 <button onclick="history.back()"
-                    class="inline-flex items-center justify-center rounded-lg border border-slate-700/80 bg-slate-900/60 px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-slate-500 hover:text-white">
-                    ← Voltar
+                    class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-700/80 bg-slate-900/60 px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-slate-500 hover:text-white">
+                    <iconify-icon icon="heroicons:arrow-left"></iconify-icon>
+                    Voltar
                 </button>
+
+                <a href="/browse/"
+                    class="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-600">
+                    <iconify-icon icon="heroicons:home"></iconify-icon>
+                    Página Inicial
+                </a>
 
                 {% if error_type == "permission" %}
                 <button onclick="location.reload()"
-                    class="inline-flex items-center justify-center rounded-lg border border-blue-500/50 bg-blue-500/10 px-4 py-2 text-sm font-medium text-blue-400 transition hover:bg-blue-500/20">
-                    🔄 Tentar Novamente
+                    class="inline-flex items-center justify-center gap-2 rounded-lg border border-blue-500/50 bg-blue-500/10 px-4 py-2 text-sm font-medium text-blue-400 transition hover:bg-blue-500/20">
+                    <iconify-icon icon="heroicons:arrow-path"></iconify-icon>
+                    Tentar Novamente
                 </button>
                 {% endif %}
             </div>

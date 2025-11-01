@@ -4,7 +4,8 @@
 
 {% block actions %}
 <a href="/download/{{ encoded_path }}"
-    class="inline-flex items-center gap-2 rounded-full border border-emerald-400/50 bg-emerald-500/20 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-emerald-200 transition hover:border-emerald-400 hover:bg-emerald-500/30">💾
+    class="inline-flex items-center gap-2 rounded-full border border-emerald-400/50 bg-emerald-500/20 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-emerald-200 transition hover:border-emerald-400 hover:bg-emerald-500/30">
+    <iconify-icon icon="heroicons:arrow-down-tray"></iconify-icon>
     Download</a>
 {% endblock %}
 
@@ -84,7 +85,7 @@
         {% when _ %}
         <div
             class="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-slate-700 bg-slate-900/50 p-10 text-center text-sm text-slate-400">
-            <img src="/static/icons/{{ media_kind.icon_name() }}" alt="File icon" class="h-16 w-16 opacity-70">
+            <iconify-icon icon="{{ media_kind.icon_name() }}" class="text-6xl text-slate-400 opacity-70"></iconify-icon>
             <p>Visualização não disponível para este tipo de arquivo.</p>
         </div>
         {% endmatch %}

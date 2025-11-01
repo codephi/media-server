@@ -12,16 +12,16 @@ pub enum MediaKind {
 }
 
 impl MediaKind {
-    /// Get the icon filename for this media type
+    /// Get the Iconify icon name for this media type
     pub fn icon_name(&self) -> &'static str {
         match self {
-            Self::Image => "image.svg",
-            Self::Video => "video.svg",
-            Self::Audio => "audio.svg",
-            Self::Pdf => "pdf.svg",
-            Self::Text => "text.svg",
-            Self::Archive => "archive.svg",
-            Self::Other => "file.svg",
+            Self::Image => "heroicons:photo",
+            Self::Video => "heroicons:play-circle",
+            Self::Audio => "heroicons:musical-note",
+            Self::Pdf => "heroicons:document-text",
+            Self::Text => "heroicons:document",
+            Self::Archive => "heroicons:archive-box",
+            Self::Other => "heroicons:document",
         }
     }
 
@@ -29,6 +29,11 @@ impl MediaKind {
     pub fn has_thumbnail(&self) -> bool {
         matches!(self, Self::Image | Self::Video)
     }
+}
+
+/// Get folder icon name for Iconify
+pub fn folder_icon() -> &'static str {
+    "heroicons:folder"
 }
 
 /// Detect MIME type and media kind from file path

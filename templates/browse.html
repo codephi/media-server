@@ -22,7 +22,8 @@
     <button type="button"
         class="inline-flex items-center gap-2 rounded-full border border-slate-700/80 bg-slate-900/60 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-100 transition hover:border-slate-500 hover:text-white"
         onclick="document.getElementById('file-input').click()">
-        📤 Carregar Arquivos
+        <iconify-icon icon="heroicons:arrow-up-tray"></iconify-icon>
+        Carregar Arquivos
     </button>
     <button type="submit" id="upload-btn"
         class="hidden inline-flex items-center gap-2 rounded-full border border-emerald-400/50 bg-emerald-500/20 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-emerald-200 transition hover:border-emerald-400 hover:bg-emerald-500/30">
@@ -56,8 +57,10 @@
                 class="h-44 w-full rounded-lg border border-slate-800/70 object-cover object-center transition group-hover:border-slate-600">
             {% else %}
             <div
-                class="flex h-44 w-full items-center justify-center rounded-lg border border-dashed border-slate-700 bg-slate-900/60">
-                <img src="/static/icons/{{ item.icon }}" alt="{{ item.name }}" class="h-12 w-12 opacity-75">
+                class="flex h-44 w-full items-center justify-center rounded-lg border border-dashed border-slate-700 bg-slate-900/60 relative">
+                <iconify-icon icon="{{ item.icon }}" width="48" height="48"
+                    class="text-slate-400 opacity-75"></iconify-icon>
+
             </div>
             {% endif %}
             <div class="truncate text-sm font-medium text-slate-100" title="{{ item.name }}">{{ item.name }}</div>
@@ -79,7 +82,7 @@
             {% for item in items %}
             <tr class="transition hover:bg-slate-900">
                 <td class="flex items-center gap-3 px-4 py-3 text-slate-100">
-                    <img src="/static/icons/{{ item.icon }}" alt="" class="h-5 w-5 opacity-80">
+                    <iconify-icon icon="{{ item.icon }}" class="text-lg text-slate-400 opacity-80"></iconify-icon>
                     <a class="truncate font-medium"
                         href="{% if item.is_dir %}/browse/{{ item.encoded_path }}{% else %}/file/{{ item.encoded_path }}{% endif %}">
                         {{ item.name }}
@@ -97,7 +100,8 @@
 {% if items.is_empty() %}
 <div
     class="mt-10 flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-slate-700 bg-slate-900/40 px-8 py-12 text-center text-sm text-slate-400">
-    <p>📁 Diretório vazio</p>
+    <iconify-icon icon="heroicons:folder-open" class="text-3xl text-slate-500"></iconify-icon>
+    <p>Diretório vazio</p>
 </div>
 {% endif %}
 {% endblock %}
@@ -112,7 +116,7 @@
         fileInput.addEventListener('change', function () {
             if (this.files.length > 0) {
                 uploadButton.classList.remove('hidden');
-                uploadButton.textContent = `Enviar ${this.files.length} arquivo(s)`;
+                uploadButton.innerHTML = `<iconify-icon icon="heroicons:arrow-up-tray"></iconify-icon> Enviar ${this.files.length} arquivo(s)`;
             } else {
                 uploadButton.classList.add('hidden');
             }
@@ -122,8 +126,41 @@
             if (fileInput.files.length === 0) {
                 e.preventDefault();
                 alert('Selecione pelo menos um arquivo');
+                return;
             }
+
+            // Show upload progress
+            uploadButton.innerHTML = `<iconify-icon icon="heroicons:arrow-path" class="animate-spin"></iconify-icon> Enviando...`;
+            uploadButton.disabled = true;
         });
     }
+
+    // Debug: verificar se os ícones do Iconify estão carregando
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('Iconify loaded:', typeof window.IconifyIcon !== 'undefined');
+
+        // Verificar se há elementos iconify-icon na página
+        const iconifyElements = document.querySelectorAll('iconify-icon');
+        console.log('Iconify elements found:', iconifyElements.length);
+
+        iconifyElements.forEach((el, index) => {
+            console.log(`Icon ${index}:`, el.getAttribute('icon'));
+        });
+
+        // Timeout para verificar se os ícones carregaram e mostrar fallback se necessário
+        setTimeout(() => {
+            iconifyElements.forEach((el) => {
+                // Se o ícone não carregou (não tem conteúdo), mostrar fallback
+                if (!el.innerHTML.trim()) {
+                    console.log('Icon failed to load:', el.getAttribute('icon'));
+                    const fallback = el.parentElement.querySelector('.fallback-icon');
+                    if (fallback) {
+                        el.style.display = 'none';
+                        fallback.classList.remove('hidden');
+                    }
+                }
+            });
+        }, 2000);
+    });
 </script>
 {% endblock %}
