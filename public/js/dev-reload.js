@@ -53,36 +53,8 @@
         eventSource.addEventListener('template-changed', function (event) {
             console.log('[Dev Reload] Template change detected - requires recompilation!');
 
-            // Show warning about template changes
-            const warning = document.createElement('div');
-            warning.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: #f59e0b;
-                color: white;
-                padding: 15px 20px;
-                border-radius: 8px;
-                z-index: 10000;
-                font-family: monospace;
-                font-size: 14px;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                max-width: 400px;
-                line-height: 1.4;
-            `;
-            warning.innerHTML = `
-                <div style="font-weight: bold; margin-bottom: 8px;">⚠️ Template Changed</div>
-                <div style="font-size: 12px;">Templates require recompilation.<br>
-                Restart with <code>./dev.sh</code> for automatic rebuilds.</div>
-            `;
-            document.body.appendChild(warning);
 
-            // Auto-remove warning after 8 seconds
-            setTimeout(() => {
-                if (warning.parentNode) {
-                    warning.parentNode.removeChild(warning);
-                }
-            }, 8000);
+            window.location.reload();
         });
 
         eventSource.onerror = function (event) {
